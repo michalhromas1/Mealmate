@@ -1,5 +1,15 @@
-import { app } from './app/app';
+// import { app } from './app/app';
 
-(async () => {
-  await app.run();
-})();
+import { expressAdapter } from './app/express-adapter/express-adapter';
+import { router } from './router';
+
+const port = 3000;
+const basePath = '/api';
+
+expressAdapter.startServer(port, basePath, router, () => {
+  console.log('Server started at port: ' + port);
+});
+
+// (async () => {
+//   await app.run();
+// })();
