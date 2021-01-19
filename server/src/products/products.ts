@@ -8,71 +8,62 @@ interface Product {
   quantity: string;
 }
 
-export const products = {
+export class Products {
+  private browser: puppeteer.Browser;
+  private page: puppeteer.Page;
+
   async fetchProducts(): Promise<Product[]> {
-    const browser = await pup.createBrowser();
-    const products = await this.crawlWebsitesForProducts(browser);
-    await pup.closeBrowser(browser);
+    this.browser = await pup.createBrowser();
+    const products = await this.crawlWebsitesForProducts();
+    await pup.closeBrowser(this.browser);
     return products;
-  },
+  }
 
-  async crawlWebsitesForProducts(browser: puppeteer.Browser): Promise<Product[]> {
-    const page = await browser.newPage();
-    return await this.crawlRohlikForProducts(page);
-  },
+  private async crawlWebsitesForProducts(): Promise<Product[]> {
+    this.page = await this.browser.newPage();
+    return await this.crawlRohlikForProducts();
+  }
 
-  async crawlRohlikForProducts(page: puppeteer.Page): Promise<Product[]> {
+  private async crawlRohlikForProducts(): Promise<Product[]> {
     const url = 'https://rohlik.cz';
     const inputSelector = '#searchGlobal';
     const submitSelector = '#searchForm button';
     const query = 'jahody';
 
-    await pup.navigateTo(page, url);
-    await pup.search(page, inputSelector, submitSelector, query);
+    await pup.navigateTo(this.page, url);
+    await pup.search(this.page, inputSelector, submitSelector, query);
 
-    return await this.getProducts(page);
-  },
+    return await this.getProducts();
+  }
 
-  async getProducts(page: puppeteer.Page): Promise<Product[]> {
-    await page.waitForSelector('.productCard__title');
-    return await page.evaluate(() => {
-      const productEls = Array.from(document.querySelectorAll('.productCard__wrapper'));
-      return productEls.map((productEl) => {
-        const title = productEl.querySelector('.productCard__title')?.textContent?.trim() || '';
-        const pricePerKg = productEl.querySelector('.pricePerOffer')?.textContent?.trim() || '';
-        const quantity = productEl.querySelector('.quantity')?.textContent?.trim() || '';
-        const price = productEl.querySelector('.cardPrice .wrap .price')?.textContent?.trim() || '';
-        const priceFraction =
-          productEl.querySelector('.cardPrice .wrap .fraction')?.textContent?.trim() || '';
-        const fullPrice = `${price}.${priceFraction}`;
+  private async getProducts(): Promise<Product[]> {
+    await this.page.waitForSelector('.productCard__title');
+    const productEls = await this.page.$$('.productCard__wrapper');
+    return Promise.all(productEls.map((el) => this.createProduct(el)));
+  }
 
-        return {
-          title,
-          price: fullPrice,
-          pricePerKg,
-          quantity,
-        };
-      });
-    });
-  },
-};
+  private async createProduct(productEl: puppeteer.ElementHandle<Element>): Promise<Product> {
+    const title = await this.getElementText(productEl, '.productCard__title');
+    const pricePerKg = await this.getElementText(productEl, '.pricePerOffer');
+    const quantity = await this.getElementText(productEl, '.quantity');
+    const price = await this.getElementText(productEl, '.cardPrice .wrap .price');
+    const priceFraction = await this.getElementText(productEl, '.cardPrice .wrap .fraction');
+    const fullPrice = `${price}.${priceFraction}`;
 
-// function createProduct(productEl: Element): Product {
-//   const title = getElementText(productEl, '.productCard__title');
-//   const pricePerKg = getElementText(productEl, '.pricePerOffer');
-//   const quantity = getElementText(productEl, '.quantity');
-//   const price = getElementText(productEl, '.cardPrice .wrap .price');
-//   const priceFraction = getElementText(productEl, '.cardPrice .wrap .fraction');
-//   const fullPrice = `${price}.${priceFraction}`;
+    return {
+      title,
+      price: fullPrice,
+      pricePerKg,
+      quantity,
+    };
+  }
 
-//   return {
-//     title,
-//     price: fullPrice,
-//     pricePerKg,
-//     quantity,
-//   };
-// }
-
-// function getElementText(parentEl: Element, selector: string): string {
-//   return parentEl.querySelector(selector)?.textContent?.trim() || '';
-// }
+  private async getElementText(
+    parentEl: puppeteer.ElementHandle<Element>,
+    selector: string
+  ): Promise<string> {
+    const el = await parentEl.$(selector);
+    const property = await el?.getProperty('textContent');
+    return ((await property?.jsonValue()) as string) || '';
+  }
+}
