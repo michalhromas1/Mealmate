@@ -5,23 +5,23 @@ export interface Product {
   quantity: string;
 }
 
-export interface ProductCrawlerOptions {
+export interface CrawledWebsite {
   url: string;
-  selectors: ProductCrawlerSelectors;
+  selectors: CrawledWebsiteSelectors;
   query: string;
 }
 
-export interface ProductCrawlerSelectors {
-  search: ProductCrawlerSearchSelectors;
-  product: ProductCrawlerProductSelectors;
+export interface CrawledWebsiteSelectors {
+  search: CrawledWebsiteSearchSelectors;
+  product: CrawledWebsiteProductSelectors;
 }
 
-export interface ProductCrawlerSearchSelectors {
+export interface CrawledWebsiteSearchSelectors {
   input: string;
   submit: string;
 }
 
-export interface ProductCrawlerProductSelectors {
+export interface CrawledWebsiteProductSelectors {
   element: string;
   title: string;
   pricePerKg: string;

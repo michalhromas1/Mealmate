@@ -1,6 +1,6 @@
-import { ProductCrawlerOptions } from './products/products.model';
+import { CrawledWebsite } from './products/products.model';
 
-export const rohlikConfig: ProductCrawlerOptions = {
+export const rohlikConfig: CrawledWebsite = {
   url: 'https://rohlik.cz',
   query: 'bábovka',
   selectors: {

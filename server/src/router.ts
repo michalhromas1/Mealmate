@@ -6,6 +6,6 @@ import { rohlikConfig } from './site-configs';
 export const router = express.Router();
 
 expressAdapter.createGetRoute(router, 'products', async (res) => {
-  const products = new Products(rohlikConfig);
+  const products = new Products([rohlikConfig, rohlikConfig, rohlikConfig]);
   res.json(await products.fetchProducts());
 });
