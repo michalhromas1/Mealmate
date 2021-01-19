@@ -1,7 +1,6 @@
 export interface CrawledWebsite {
   url: string;
   selectors: CrawledWebsiteSelectors;
-  query: string;
 }
 
 export interface CrawledWebsiteSelectors {

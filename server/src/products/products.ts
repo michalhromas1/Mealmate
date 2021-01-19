@@ -10,7 +10,7 @@ import { Product } from './products.model';
 export class Products {
   private browser: puppeteer.Browser;
 
-  constructor(private websites: CrawledWebsite[]) {}
+  constructor(private websites: CrawledWebsite[], private query: string) {}
 
   async fetchProducts(): Promise<Product[][]> {
     this.browser = await pup.createBrowser();
@@ -24,7 +24,7 @@ export class Products {
       this.websites.map(async (web) => {
         const page = await this.browser.newPage();
         await pup.navigateTo(page, web.url);
-        await this.searchForProducts(page, web.selectors.search, web.query);
+        await this.searchForProducts(page, web.selectors.search);
         return await this.getAllFoundProducts(page, web.selectors.product);
       })
     );
@@ -32,10 +32,9 @@ export class Products {
 
   private async searchForProducts(
     page: puppeteer.Page,
-    searchSelectors: CrawledWebsiteSearchSelectors,
-    query: string
+    searchSelectors: CrawledWebsiteSearchSelectors
   ): Promise<void> {
-    await pup.search(page, searchSelectors.input, searchSelectors.submit, query);
+    await pup.search(page, searchSelectors.input, searchSelectors.submit, this.query);
   }
 
   private async getAllFoundProducts(
