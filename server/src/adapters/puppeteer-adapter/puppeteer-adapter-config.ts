@@ -7,6 +7,14 @@ export const puppeteerAdapterConfig: PuppeteerAdapterConfig = {
     headless: true,
   },
 
+  page: {
+    viewport: {
+      width: 1366,
+      height: 768,
+      deviceScaleFactor: 1,
+    },
+  },
+
   navigation: {
     waitUntil: navigationWaitUntil,
   },

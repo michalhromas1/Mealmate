@@ -22,7 +22,7 @@ export class Products {
   private async crawlWebsitesForProducts(): Promise<Product[][]> {
     return Promise.all(
       this.websites.map(async (web) => {
-        const page = await this.browser.newPage();
+        const page = await pup.createPage(this.browser);
         await pup.navigateTo(page, web.url);
         await this.searchForProducts(page, web.selectors.search);
         return await this.getAllFoundProducts(page, web.selectors.product);
@@ -69,6 +69,12 @@ export class Products {
   ): Promise<string> {
     const fallback = '';
     const propertyEl = await productEl.$(propertySelector);
-    return propertyEl ? pup.getProperty<string>(propertyEl, 'textContent', fallback) : fallback;
+    return propertyEl
+      ? this.parseProperty(await pup.getProperty<string>(propertyEl, 'textContent', fallback))
+      : fallback;
+  }
+
+  private parseProperty(property: string): string {
+    return property.trim().replace(/  |\r\n|\n|\r/gm, '');
   }
 }
