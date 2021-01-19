@@ -1,4 +1,4 @@
-import { PuppeteerAdapterConfig } from './puppeteer-adapter-config-model';
+import { PuppeteerAdapterConfig } from './puppeteer-adapter-config.model';
 
 const navigationWaitUntil = 'networkidle2';
 
