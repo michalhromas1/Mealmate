@@ -10,31 +10,37 @@ import { Product } from './products.model';
 export class Products {
   private browser: puppeteer.Browser;
 
-  constructor(private websites: CrawledWebsite[], private query: string) {}
+  constructor(private websites: CrawledWebsite[], private queries: string[]) {}
 
-  async fetchProducts(): Promise<Product[][]> {
+  async fetchProducts(): Promise<Product[][][]> {
     this.browser = await pup.createBrowser();
     const products = await this.crawlWebsitesForProducts();
     await pup.closeBrowser(this.browser);
     return products;
   }
 
-  private async crawlWebsitesForProducts(): Promise<Product[][]> {
+  private async crawlWebsitesForProducts(): Promise<Product[][][]> {
     return Promise.all(
       this.websites.map(async (web) => {
         const page = await pup.createPage(this.browser);
-        await pup.navigateTo(page, web.url);
-        await this.searchForProducts(page, web.selectors.search);
-        return await this.getAllFoundProducts(page, web.selectors.product);
+
+        return Promise.all(
+          this.queries.map(async (query) => {
+            await pup.navigateTo(page, web.url);
+            await this.searchForProducts(page, web.selectors.search, query);
+            return await this.getAllFoundProducts(page, web.selectors.product);
+          })
+        );
       })
     );
   }
 
   private async searchForProducts(
     page: puppeteer.Page,
-    searchSelectors: CrawledWebsiteSearchSelectors
+    searchSelectors: CrawledWebsiteSearchSelectors,
+    query: string
   ): Promise<void> {
-    await pup.search(page, searchSelectors.input, searchSelectors.submit, this.query);
+    await pup.search(page, searchSelectors.input, searchSelectors.submit, query);
   }
 
   private async getAllFoundProducts(

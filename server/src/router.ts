@@ -6,7 +6,7 @@ import { Products } from './products/products';
 export const router = express.Router();
 
 expressAdapter.createGetRoute(router, 'products', async (res) => {
-  const query = 'banán';
-  const products = new Products(crawledWebsites, query);
+  const queries = ['avokádo', 'mango', 'losos'];
+  const products = new Products(crawledWebsites, queries);
   res.json(await products.fetchProducts());
 });
