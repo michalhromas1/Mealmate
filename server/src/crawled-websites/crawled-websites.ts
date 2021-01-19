@@ -1,4 +1,4 @@
 import { CrawledWebsite } from './crawled-websites.model';
-import { rohlik } from './websites/rohlik';
+import { kosik } from './websites/kosik';
 
-export const crawledWebsites: CrawledWebsite[] = [rohlik];
+export const crawledWebsites: CrawledWebsite[] = [kosik];
