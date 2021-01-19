@@ -17,50 +17,45 @@ export class Products {
 
   private async crawlWebsitesForProducts(): Promise<Product[]> {
     this.page = await this.browser.newPage();
-    return await this.crawlRohlikForProducts();
+    await this.searchForProducts();
+    return await this.getAllFoundProducts();
   }
 
-  private async crawlRohlikForProducts(): Promise<Product[]> {
+  private async searchForProducts(): Promise<void> {
     const { search: searchSelectors } = this.options.selectors;
 
     await pup.navigateTo(this.page, this.options.url);
     await pup.search(this.page, searchSelectors.input, searchSelectors.submit, this.options.query);
-
-    return await this.getProducts();
   }
 
-  private async getProducts(): Promise<Product[]> {
+  private async getAllFoundProducts(): Promise<Product[]> {
     const { product: productsSelectors } = this.options.selectors;
 
     await this.page.waitForSelector(productsSelectors.title);
     const productEls = await this.page.$$(productsSelectors.element);
-    return Promise.all(productEls.map((el) => this.createProduct(el)));
+    return Promise.all(productEls.map((el) => this.getFoundProduct(el)));
   }
 
-  private async createProduct(productEl: puppeteer.ElementHandle<Element>): Promise<Product> {
+  private async getFoundProduct(productEl: puppeteer.ElementHandle<Element>): Promise<Product> {
     const { product: productsSelectors } = this.options.selectors;
 
-    const title = await this.getElementText(productEl, productsSelectors.title);
-    const pricePerKg = await this.getElementText(productEl, productsSelectors.pricePerKg);
-    const quantity = await this.getElementText(productEl, productsSelectors.quantity);
-    const price = await this.getElementText(productEl, productsSelectors.price);
-    const priceFraction = await this.getElementText(productEl, productsSelectors.priceFraction);
-    const fullPrice = `${price}.${priceFraction}`;
+    const price = await this.getProductProperty(productEl, productsSelectors.price);
+    const priceFraction = await this.getProductProperty(productEl, productsSelectors.priceFraction);
 
     return {
-      title,
-      price: fullPrice,
-      pricePerKg,
-      quantity,
+      price: `${price}.${priceFraction}`,
+      title: await this.getProductProperty(productEl, productsSelectors.title),
+      pricePerKg: await this.getProductProperty(productEl, productsSelectors.pricePerKg),
+      quantity: await this.getProductProperty(productEl, productsSelectors.quantity),
     };
   }
 
-  private async getElementText(
-    parentEl: puppeteer.ElementHandle<Element>,
-    selector: string
+  private async getProductProperty(
+    productEl: puppeteer.ElementHandle<Element>,
+    propertySelector: string
   ): Promise<string> {
     const fallback = '';
-    const element = await parentEl.$(selector);
-    return element ? pup.getProperty<string>(element, 'textContent', fallback) : fallback;
+    const propertyEl = await productEl.$(propertySelector);
+    return propertyEl ? pup.getProperty<string>(propertyEl, 'textContent', fallback) : fallback;
   }
 }
