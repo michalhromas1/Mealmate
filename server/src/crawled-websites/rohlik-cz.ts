@@ -1,6 +1,6 @@
-import { CrawledWebsite } from './products/products.model';
+import { CrawledWebsite } from './crawled-websites.model';
 
-export const rohlikConfig: CrawledWebsite = {
+export const rohlikCz: CrawledWebsite = {
   url: 'https://rohlik.cz',
   query: 'bábovka',
   selectors: {

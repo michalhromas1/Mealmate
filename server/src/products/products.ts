@@ -4,8 +4,8 @@ import {
   CrawledWebsite,
   CrawledWebsiteProductSelectors,
   CrawledWebsiteSearchSelectors,
-  Product,
-} from './products.model';
+} from '../crawled-websites/crawled-websites.model';
+import { Product } from './products.model';
 
 export class Products {
   private browser: puppeteer.Browser;
