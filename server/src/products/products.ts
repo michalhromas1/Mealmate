@@ -62,8 +62,8 @@ export class Products {
     parentEl: puppeteer.ElementHandle<Element>,
     selector: string
   ): Promise<string> {
-    const el = await parentEl.$(selector);
-    const property = await el?.getProperty('textContent');
-    return ((await property?.jsonValue()) as string) || '';
+    const fallback = '';
+    const element = await parentEl.$(selector);
+    return element ? pup.getProperty<string>(element, 'textContent', fallback) : fallback;
   }
 }

@@ -58,4 +58,12 @@ export const puppeteerAdapter = {
       text
     );
   },
+
+  async getProperty<T>(
+    element: puppeteer.ElementHandle<Element>,
+    property: string,
+    fallback: T
+  ): Promise<T> {
+    return ((await (await element?.getProperty(property))?.jsonValue()) as T) || fallback;
+  },
 };
