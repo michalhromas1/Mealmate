@@ -11,7 +11,9 @@ export const puppeteerAdapter = {
   },
 
   async createPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
-    return await browser.newPage();
+    const page = await browser.newPage();
+    await page.setViewport(paConfig.page.viewport);
+    return page;
   },
 
   async navigateTo(page: puppeteer.Page, url: string): Promise<void> {
@@ -57,5 +59,13 @@ export const puppeteerAdapter = {
       selector,
       text
     );
+  },
+
+  async getProperty<T>(
+    element: puppeteer.ElementHandle<Element>,
+    property: string,
+    fallback: T
+  ): Promise<T> {
+    return ((await (await element?.getProperty(property))?.jsonValue()) as T) || fallback;
   },
 };
