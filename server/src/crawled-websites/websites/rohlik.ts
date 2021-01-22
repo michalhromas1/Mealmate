@@ -8,12 +8,13 @@ export const rohlik: CrawledWebsite = {
       submit: '#searchForm button',
     },
     product: {
-      element: '.productCard__wrapper',
+      variant: '.productCard__wrapper',
       title: '.productCard__title',
       pricePerKg: '.pricePerOffer',
       quantity: '.quantity',
       price: '.cardPrice .wrap .price',
       priceFraction: '.cardPrice .wrap .fraction',
+      noVariants: '[data-test="no-products-found"]',
     },
   },
 };

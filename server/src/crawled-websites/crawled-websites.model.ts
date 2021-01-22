@@ -14,7 +14,8 @@ export interface CrawledWebsiteSearchSelectors {
 }
 
 export interface CrawledWebsiteProductSelectors {
-  element: string;
+  variant: string;
+  noVariants: string;
   title: string;
   pricePerKg: string;
   quantity: string;

@@ -10,12 +10,13 @@ export const kosik: CrawledWebsite = {
       submit: 'form.product-search__form .product-search__submit',
     },
     product: {
-      element: productSelector,
+      variant: productSelector,
       title: `${productSelector} .name`,
       pricePerKg: `${productSelector} .price-unit`,
       quantity: `${productSelector} .quantity span`,
       price: `${productSelector} .price`,
       priceFraction: `${productSelector} .price`,
+      noVariants: '[data-v-1ea39232]',
     },
   },
 };
