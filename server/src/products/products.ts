@@ -3,78 +3,125 @@ import { puppeteerAdapter as pup } from '../adapters/puppeteer-adapter/puppeteer
 import {
   CrawledWebsite,
   CrawledWebsiteProductSelectors,
-  CrawledWebsiteSearchSelectors,
 } from '../crawled-websites/crawled-websites.model';
-import { Product } from './products.model';
+import {
+  Products as ProductsModel,
+  ProductVariant,
+  ProductVariantsOnWebsite,
+} from './products.model';
 
 export class Products {
-  private browser: puppeteer.Browser;
-
   constructor(private websites: CrawledWebsite[], private queries: string[]) {}
 
-  async fetchProducts(): Promise<Product[][][]> {
-    this.browser = await pup.createBrowser();
-    const products = await this.crawlWebsitesForProducts();
-    await pup.closeBrowser(this.browser);
-    return products;
+  async fetchProducts(): Promise<ProductsModel> {
+    return await this.searchForProducts();
   }
 
-  private async crawlWebsitesForProducts(): Promise<Product[][][]> {
-    return Promise.all(
-      this.websites.map(async (web) => {
-        const page = await pup.createPage(this.browser);
+  private async searchForProducts(): Promise<ProductsModel> {
+    const results: ProductsModel = [];
 
-        return Promise.all(
-          this.queries.map(async (query) => {
-            await pup.navigateTo(page, web.url);
-            await this.searchForProducts(page, web.selectors.search, query);
-            return await this.getAllFoundProducts(page, web.selectors.product);
-          })
-        );
-      })
-    );
+    for (let i = 0; i < this.queries.length; i++) {
+      const query = this.queries[i];
+      const webResults = await this.searchWebsitesForProductVariants(query);
+      results.push({
+        title: query,
+        webResults,
+      });
+    }
+
+    return results;
   }
 
-  private async searchForProducts(
-    page: puppeteer.Page,
-    searchSelectors: CrawledWebsiteSearchSelectors,
+  private async searchWebsitesForProductVariants(
     query: string
-  ): Promise<void> {
-    await pup.search(page, searchSelectors.input, searchSelectors.submit, query);
+  ): Promise<ProductVariantsOnWebsite[]> {
+    const productVariantsOnWebsites: ProductVariantsOnWebsite[] = [];
+
+    for (let i = 0; i < this.websites.length; i++) {
+      const website = this.websites[i];
+
+      const browser = await pup.createBrowser();
+      const page = await pup.createPage(browser);
+
+      await pup.navigateTo(page, website.url);
+      await pup.search(
+        page,
+        website.selectors.search.input,
+        website.selectors.search.submit,
+        query
+      );
+
+      const productVariants = await this.searchSingleWebsiteForProductVariants(
+        page,
+        website.selectors.product
+      );
+
+      await pup.closeBrowser(browser);
+
+      productVariantsOnWebsites.push({
+        website: website.url,
+        productVariants,
+      });
+    }
+
+    return productVariantsOnWebsites;
   }
 
-  private async getAllFoundProducts(
+  private async searchSingleWebsiteForProductVariants(
     page: puppeteer.Page,
     productSelectors: CrawledWebsiteProductSelectors
-  ): Promise<Product[]> {
-    await page.waitForSelector(productSelectors.title);
-    const productEls = await page.$$(productSelectors.element);
-    return Promise.all(
-      productEls.map((productEl) => this.getFoundProduct(productEl, productSelectors))
-    );
+  ): Promise<ProductVariant[]> {
+    let hasVariants = false;
+
+    await Promise.race([
+      page.waitForSelector(productSelectors.title).then(() => (hasVariants = true)),
+      page.waitForSelector(productSelectors.noVariants),
+    ]).catch(() => {});
+
+    return hasVariants
+      ? await this.getProductVariantsFromSingleWebsite(page, productSelectors)
+      : [];
   }
 
-  private async getFoundProduct(
-    productEl: puppeteer.ElementHandle<Element>,
+  private async getProductVariantsFromSingleWebsite(
+    page: puppeteer.Page,
     productSelectors: CrawledWebsiteProductSelectors
-  ): Promise<Product> {
-    const price = await this.getProductProperty(productEl, productSelectors.price);
-    const priceFraction = await this.getProductProperty(productEl, productSelectors.priceFraction);
+  ): Promise<ProductVariant[]> {
+    const variants: ProductVariant[] = [];
+    const variantEls = await page.$$(productSelectors.variant);
+
+    for (let i = 0; i < variantEls.length; i++) {
+      const variant = await this.getSingleProductVariant(variantEls[i], productSelectors);
+      variants.push(variant);
+    }
+
+    return variants;
+  }
+
+  private async getSingleProductVariant(
+    variantEl: puppeteer.ElementHandle<Element>,
+    productSelectors: CrawledWebsiteProductSelectors
+  ): Promise<ProductVariant> {
+    const price = await this.getProductVariantProperty(variantEl, productSelectors.price);
+    const priceFraction = await this.getProductVariantProperty(
+      variantEl,
+      productSelectors.priceFraction
+    );
 
     return {
       price: `${price}.${priceFraction}`,
-      title: await this.getProductProperty(productEl, productSelectors.title),
-      pricePerKg: await this.getProductProperty(productEl, productSelectors.pricePerKg),
-      quantity: await this.getProductProperty(productEl, productSelectors.quantity),
+      title: await this.getProductVariantProperty(variantEl, productSelectors.title),
+      pricePerKg: await this.getProductVariantProperty(variantEl, productSelectors.pricePerKg),
+      quantity: await this.getProductVariantProperty(variantEl, productSelectors.quantity),
     };
   }
 
-  private async getProductProperty(
-    productEl: puppeteer.ElementHandle<Element>,
+  private async getProductVariantProperty(
+    variantEl: puppeteer.ElementHandle<Element>,
     propertySelector: string
   ): Promise<string> {
     const fallback = '';
-    const propertyEl = await productEl.$(propertySelector);
+    const propertyEl = await variantEl.$(propertySelector);
     return propertyEl
       ? this.parseProperty(await pup.getProperty<string>(propertyEl, 'textContent', fallback))
       : fallback;
