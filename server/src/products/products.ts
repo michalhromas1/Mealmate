@@ -29,36 +29,101 @@ export class Products {
   }
 
   private async searchWebsitesForProductVariants(query: string): Promise<ProductResults[]> {
-    const productVariantsOnWebsites: ProductResults[] = [];
-
+    const promisesBrowsers = [];
     for (let i = 0; i < this.websites.length; i++) {
       const website = this.websites[i];
+      promisesBrowsers.push(
+        new Promise(async (resBrowser: (value: ProductResults) => void) => {
+          const browser = await pup.createBrowser();
+          const page = await pup.getFirstBrowserPage(browser);
 
-      const browser = await pup.createBrowser();
-      const page = await pup.getFirstBrowserPage(browser);
+          await pup.navigateTo(page, website.url);
+          await pup.search(
+            page,
+            website.selectors.search.input,
+            website.selectors.search.submit,
+            query
+          );
 
-      await pup.navigateTo(page, website.url);
-      await pup.search(
-        page,
-        website.selectors.search.input,
-        website.selectors.search.submit,
-        query
+          const productVariants = await this.searchSingleWebsiteForProductVariants(
+            page,
+            website.selectors.product
+          );
+
+          await pup.closeBrowser(browser);
+
+          resBrowser({
+            website: website.url,
+            variants: productVariants,
+          });
+
+          // return {
+          //   website: website.url,
+          //   variants: productVariants,
+          // };
+        })
       );
-
-      const productVariants = await this.searchSingleWebsiteForProductVariants(
-        page,
-        website.selectors.product
-      );
-
-      await pup.closeBrowser(browser);
-
-      productVariantsOnWebsites.push({
-        website: website.url,
-        variants: productVariants,
-      });
     }
 
-    return productVariantsOnWebsites;
+    return await Promise.all(promisesBrowsers);
+
+    // return Promise.all(
+    //   this.websites.map(async (website) => {
+    //     const browser = await pup.createBrowser();
+    //     const page = await pup.getFirstBrowserPage(browser);
+
+    //     await pup.navigateTo(page, website.url);
+    //     await pup.search(
+    //       page,
+    //       website.selectors.search.input,
+    //       website.selectors.search.submit,
+    //       query
+    //     );
+
+    //     const productVariants = await this.searchSingleWebsiteForProductVariants(
+    //       page,
+    //       website.selectors.product
+    //     );
+
+    //     await pup.closeBrowser(browser);
+
+    //     return {
+    //       website: website.url,
+    //       variants: productVariants,
+    //     };
+    //   })
+    // );
+
+    // const productVariantsOnWebsites: ProductResults[] = [];
+
+    // for (let i = 0; i < this.websites.length; i++) {
+    //   const website = this.websites[i];
+
+    //   const browser = await pup.createBrowser();
+    //   const page = await pup.getFirstBrowserPage(browser);
+
+    //   await pup.navigateTo(page, website.url);
+    //   await pup.search(
+    //     page,
+    //     website.selectors.search.input,
+    //     website.selectors.search.submit,
+    //     query
+    //   );
+
+    //   const productVariants = await this.searchSingleWebsiteForProductVariants(
+    //     page,
+    //     website.selectors.product
+    //   );
+
+    //   await pup.closeBrowser(browser);
+
+    //   productVariantsOnWebsites.push({
+    //     website: website.url,
+    //     variants: productVariants,
+    //   });
+    // }
+
+    // return productVariantsOnWebsites;
   }
 
   private async searchSingleWebsiteForProductVariants(
