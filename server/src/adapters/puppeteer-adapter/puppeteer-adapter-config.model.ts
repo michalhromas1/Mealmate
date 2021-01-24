@@ -6,5 +6,6 @@ export interface PuppeteerAdapterConfig {
   directNavigation: puppeteer.DirectNavigationOptions | undefined;
   page: {
     viewport: puppeteer.Viewport;
+    waitForSelector: puppeteer.WaitForSelectorOptions;
   };
 }

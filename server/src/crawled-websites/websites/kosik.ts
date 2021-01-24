@@ -16,7 +16,8 @@ export const kosik: CrawledWebsite = {
       quantity: `${productSelector} .quantity span`,
       price: `${productSelector} .price`,
       priceFraction: `${productSelector} .price`,
-      noVariants: '[data-v-1ea39232]',
+      // noVariants: '[data-v-1ea39232]',
+      noVariants: '.ahojdajdadaa',
     },
   },
 };

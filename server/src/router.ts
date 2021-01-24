@@ -8,15 +8,15 @@ export const router = express.Router();
 expressAdapter.createGetRoute(router, 'products', async (res) => {
   const queries = [
     'mango',
-    'losos',
-    'chřest',
     'spacák',
-    'mrkev',
-    'palačinky',
-    'pomelo',
-    'kuře',
-    'těstoviny',
-    'bramborový salát',
+    'losos',
+    // 'chřest',
+    // 'mrkev',
+    // 'palačinky',
+    // 'pomelo',
+    // 'kuře',
+    // 'těstoviny',
+    // 'bramborový salát',
   ];
   const products = new Products(crawledWebsites, queries);
   res.json(await products.fetchProducts());

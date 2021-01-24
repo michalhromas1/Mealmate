@@ -4,7 +4,7 @@ const navigationWaitUntil = 'networkidle2';
 
 export const puppeteerAdapterConfig: PuppeteerAdapterConfig = {
   browser: {
-    headless: true,
+    headless: false,
   },
 
   page: {
@@ -12,6 +12,9 @@ export const puppeteerAdapterConfig: PuppeteerAdapterConfig = {
       width: 1366,
       height: 768,
       deviceScaleFactor: 1,
+    },
+    waitForSelector: {
+      timeout: 6000,
     },
   },
 

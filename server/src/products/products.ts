@@ -74,8 +74,8 @@ export class Products {
     let hasVariants = false;
 
     await Promise.race([
-      page.waitForSelector(productSelectors.title).then(() => (hasVariants = true)),
-      page.waitForSelector(productSelectors.noVariants),
+      pup.waitForSelector(page, productSelectors.title).then(() => (hasVariants = true)),
+      pup.waitForSelector(page, productSelectors.noVariants),
     ]).catch(() => {});
 
     return hasVariants

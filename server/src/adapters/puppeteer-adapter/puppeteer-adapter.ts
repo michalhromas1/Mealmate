@@ -68,4 +68,11 @@ export const puppeteerAdapter = {
   ): Promise<T> {
     return ((await (await element?.getProperty(property))?.jsonValue()) as T) || fallback;
   },
+
+  async waitForSelector(
+    page: puppeteer.Page,
+    selector: string
+  ): Promise<puppeteer.ElementHandle<Element>> {
+    return await page.waitForSelector(selector, paConfig.page.waitForSelector);
+  },
 };
