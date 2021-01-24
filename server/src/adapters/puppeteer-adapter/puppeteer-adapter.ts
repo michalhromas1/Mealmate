@@ -23,8 +23,21 @@ export const puppeteerAdapter = {
   },
 
   async configurePage(page: puppeteer.Page): Promise<puppeteer.Page> {
+    await page.setUserAgent(paConfig.page.userAgent);
     await page.setViewport(paConfig.page.viewport);
+    await this.disableImageLoad(page);
     return page;
+  },
+
+  async disableImageLoad(page: puppeteer.Page): Promise<void> {
+    await page.setRequestInterception(true);
+
+    page.on('request', (request) => {
+      const resourceType = request.resourceType();
+      const shouldCancelRequest = resourceType === 'image';
+      if (shouldCancelRequest) request.abort();
+      else request.continue();
+    });
   },
 
   async navigateTo(page: puppeteer.Page, url: string): Promise<void> {

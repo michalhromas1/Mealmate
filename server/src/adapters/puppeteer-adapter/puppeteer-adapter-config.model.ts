@@ -7,5 +7,6 @@ export interface PuppeteerAdapterConfig {
   page: {
     viewport: puppeteer.Viewport;
     waitForSelector: puppeteer.WaitForSelectorOptions;
+    userAgent: string;
   };
 }
