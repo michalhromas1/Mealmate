@@ -1,13 +1,11 @@
-export type Products = Product[];
-
 export interface Product {
   title: string;
-  webResults: ProductVariantsOnWebsite[];
+  results: ProductResults[];
 }
 
-export interface ProductVariantsOnWebsite {
+export interface ProductResults {
   website: string;
-  productVariants: ProductVariant[];
+  variants: ProductVariant[];
 }
 
 export interface ProductVariant {

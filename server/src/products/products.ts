@@ -4,38 +4,32 @@ import {
   CrawledWebsite,
   CrawledWebsiteProductSelectors,
 } from '../crawled-websites/crawled-websites.model';
-import {
-  Products as ProductsModel,
-  ProductVariant,
-  ProductVariantsOnWebsite,
-} from './products.model';
+import { Product, ProductResults, ProductVariant } from './products.model';
 
 export class Products {
   constructor(private websites: CrawledWebsite[], private queries: string[]) {}
 
-  async fetchProducts(): Promise<ProductsModel> {
+  async fetchProducts(): Promise<Product[]> {
     return await this.searchForProducts();
   }
 
-  private async searchForProducts(): Promise<ProductsModel> {
-    const results: ProductsModel = [];
+  private async searchForProducts(): Promise<Product[]> {
+    const results: Product[] = [];
 
     for (let i = 0; i < this.queries.length; i++) {
       const query = this.queries[i];
       const webResults = await this.searchWebsitesForProductVariants(query);
       results.push({
         title: query,
-        webResults,
+        results: webResults,
       });
     }
 
     return results;
   }
 
-  private async searchWebsitesForProductVariants(
-    query: string
-  ): Promise<ProductVariantsOnWebsite[]> {
-    const productVariantsOnWebsites: ProductVariantsOnWebsite[] = [];
+  private async searchWebsitesForProductVariants(query: string): Promise<ProductResults[]> {
+    const productVariantsOnWebsites: ProductResults[] = [];
 
     for (let i = 0; i < this.websites.length; i++) {
       const website = this.websites[i];
@@ -60,7 +54,7 @@ export class Products {
 
       productVariantsOnWebsites.push({
         website: website.url,
-        productVariants,
+        variants: productVariants,
       });
     }
 
