@@ -41,7 +41,7 @@ export class Products {
       const website = this.websites[i];
 
       const browser = await pup.createBrowser();
-      const page = await pup.createPage(browser);
+      const page = await pup.getFirstBrowserPage(browser);
 
       await pup.navigateTo(page, website.url);
       await pup.search(

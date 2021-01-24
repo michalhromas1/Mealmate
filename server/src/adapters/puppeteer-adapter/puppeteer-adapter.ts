@@ -12,6 +12,17 @@ export const puppeteerAdapter = {
 
   async createPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
     const page = await browser.newPage();
+    await this.configurePage(page);
+    return page;
+  },
+
+  async getFirstBrowserPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
+    const page = (await browser.pages())[0];
+    await this.configurePage(page);
+    return page;
+  },
+
+  async configurePage(page: puppeteer.Page): Promise<puppeteer.Page> {
     await page.setViewport(paConfig.page.viewport);
     return page;
   },
