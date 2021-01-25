@@ -50,11 +50,8 @@ export const puppeteerAdapter = {
     submitSelector: string,
     query: string
   ): Promise<void> {
-    console.log('1.1');
     await puppeteerAdapter.typeInto(page, inputSelector, query);
-    console.log('1.2');
     await puppeteerAdapter.clickAndNavigate(page, submitSelector);
-    console.log('1.3');
   },
 
   async clickAndNavigate(page: puppeteer.Page, selector: string): Promise<void> {

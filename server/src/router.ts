@@ -10,7 +10,7 @@ expressAdapter.createGetRoute(router, 'products', async (res) => {
   console.log('running benchmark...');
 
   let totalTime = 0;
-  const nOfTries = 1;
+  const nOfTries = 10;
 
   let fetchedProducts: Product[] = [];
 
