@@ -1,7 +1,7 @@
 import * as express from 'express';
 import { expressAdapter } from './adapters/express-adapter/express-adapter';
 import { crawledWebsites } from './crawled-websites/crawled-websites';
-import { Products } from './products/products';
+import { ProductsCluster } from './products/products-cluster';
 import { Product } from './products/products.model';
 
 export const router = express.Router();
@@ -10,7 +10,7 @@ expressAdapter.createGetRoute(router, 'products', async (res) => {
   console.log('running benchmark...');
 
   let totalTime = 0;
-  const nOfTries = 10;
+  const nOfTries = 1;
 
   let fetchedProducts: Product[] = [];
 
@@ -28,7 +28,8 @@ expressAdapter.createGetRoute(router, 'products', async (res) => {
       // 'těstoviny',
       // 'bramborový salát',
     ];
-    const products = new Products(crawledWebsites, queries);
+    // const products = new Products(crawledWebsites, queries);
+    const products = new ProductsCluster(crawledWebsites, queries);
     fetchedProducts = await products.fetchProducts();
 
     const time = Date.now() - t0;
