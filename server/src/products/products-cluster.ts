@@ -21,7 +21,7 @@ export class ProductsCluster {
   private async searchForProducts(): Promise<Product[]> {
     const cluster: Cluster<ClusterData, void> = await Cluster.launch({
       concurrency: Cluster.CONCURRENCY_BROWSER,
-      maxConcurrency: 2,
+      maxConcurrency: 3,
       puppeteerOptions: puppeteerAdapterConfig.browser,
     });
 

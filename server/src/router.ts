@@ -10,7 +10,7 @@ expressAdapter.createGetRoute(router, 'products', async (res) => {
   console.log('running benchmark...');
 
   let totalTime = 0;
-  const nOfTries = 10;
+  const nOfTries = 1;
 
   let fetchedProducts: Product[] = [];
 
@@ -20,7 +20,7 @@ expressAdapter.createGetRoute(router, 'products', async (res) => {
       'mango',
       'losos',
       'chřest',
-      // 'spacák',
+      // 'banán',
       // 'mrkev',
       // 'palačinky',
       // 'pomelo',
