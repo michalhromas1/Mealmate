@@ -51,13 +51,10 @@ export class ProductsCluster {
         website: website.url,
         variants: productVariants,
       });
-
-      console.table(products);
     });
 
-    cluster.on('taskerror', (err, data) => {
-      console.log(`Error crawling ${data}: ${err.message}`);
-      console.table(data);
+    cluster.on('taskerror', (err: any, data: ClusterData) => {
+      console.log(`Error crawling ${data.website} for ${data.query}: ${err.message}`);
     });
 
     this.queries.forEach((query) => {
