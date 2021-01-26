@@ -4,13 +4,13 @@ export interface Product {
 }
 
 export interface ProductResults {
-  website: string;
+  eshop: string;
   variants: ProductVariant[];
 }
 
 export interface ProductVariant {
   title: string;
-  price: string;
-  pricePerKg: string;
-  quantity: string;
+  unitPrice: string;
+  image: string;
+  link: string;
 }

@@ -12,11 +12,10 @@ export const kosik: Eshop = {
     product: {
       variant: productSelector,
       title: `${productSelector} .name`,
-      pricePerKg: `${productSelector} .price-unit`,
-      quantity: `${productSelector} .quantity span`,
-      price: `${productSelector} .price`,
-      priceFraction: `${productSelector} .price`,
+      unitPrice: `${productSelector} .price-unit`,
       noVariants: '[data-v-1ea39232]',
+      image: 'a.top-wrapper img',
+      link: 'a.top-wrapper',
     },
   },
 };

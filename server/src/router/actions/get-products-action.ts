@@ -7,12 +7,12 @@ import { GetRouteAction } from '../../lib/app/app.model';
 import { Benchmark } from '../../lib/benchmark/benchmark';
 
 export const getProductsAction: GetRouteAction<Product[]> = async (response) => {
-  const benchmarkCount = 5;
+  const benchmarkCount = 1;
   const eshops: Eshop[] = [rohlik, kosik];
   const queries = [
     'mango',
-    'spacák',
-    'chřest',
+    // 'spacák',
+    // 'chřest',
     // 'banán',
     // 'mrkev',
     // 'palačinky',

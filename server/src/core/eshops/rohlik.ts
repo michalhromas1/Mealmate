@@ -10,11 +10,10 @@ export const rohlik: Eshop = {
     product: {
       variant: '.productCard__wrapper',
       title: '.productCard__title',
-      pricePerKg: '.pricePerOffer',
-      quantity: '.quantity',
-      price: '.cardPrice .wrap .price',
-      priceFraction: '.cardPrice .wrap .fraction',
+      unitPrice: '.pricePerOffer',
       noVariants: '[data-test="no-products-found"]',
+      image: '.productCard__img',
+      link: 'a.imgWrapper',
     },
   },
 };

@@ -47,7 +47,7 @@ export class Products {
       );
 
       product.results.push({
-        website: website.url,
+        eshop: website.url,
         variants: productVariants,
       });
     });
@@ -101,28 +101,23 @@ export class Products {
     variantEl: puppeteer.ElementHandle<Element>,
     productSelectors: EshopProductSelectors
   ): Promise<ProductVariant> {
-    const price = await this.getProductVariantProperty(variantEl, productSelectors.price);
-    const priceFraction = await this.getProductVariantProperty(
-      variantEl,
-      productSelectors.priceFraction
-    );
-
     return {
-      price: `${price}.${priceFraction}`,
       title: await this.getProductVariantProperty(variantEl, productSelectors.title),
-      pricePerKg: await this.getProductVariantProperty(variantEl, productSelectors.pricePerKg),
-      quantity: await this.getProductVariantProperty(variantEl, productSelectors.quantity),
+      unitPrice: await this.getProductVariantProperty(variantEl, productSelectors.unitPrice),
+      image: await this.getProductVariantProperty(variantEl, productSelectors.image, 'currentSrc'),
+      link: await this.getProductVariantProperty(variantEl, productSelectors.link, 'href'),
     };
   }
 
   private async getProductVariantProperty(
     variantEl: puppeteer.ElementHandle<Element>,
-    propertySelector: string
+    propertySelector: string,
+    property: string = 'textContent'
   ): Promise<string> {
     const fallback = '';
     const propertyEl = await variantEl.$(propertySelector);
     return propertyEl
-      ? this.parseProperty(await Pup.getProperty<string>(propertyEl, 'textContent', fallback))
+      ? this.parseProperty(await Pup.getProperty<string>(propertyEl, property, fallback))
       : fallback;
   }
 
