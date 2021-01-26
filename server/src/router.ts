@@ -1,5 +1,6 @@
 import { AppRouter } from './app/app-router';
 import { Router } from './app/app.model';
+import { Benchmark } from './benchmark/benchmark';
 import { Eshop } from './eshops/eshops.model';
 import { kosik } from './eshops/kosik';
 import { rohlik } from './eshops/rohlik';
@@ -49,7 +50,7 @@ export const createAppRouter = (): Router => {
 
     // let fetchedProducts: Product[] = [];
 
-    const fetchedProducts = await measure(1, async () => {
+    const fetchedProducts = await Benchmark.measure(2, async () => {
       const eshops: Eshop[] = [rohlik, kosik];
       const queries = [
         'mango',
@@ -72,24 +73,3 @@ export const createAppRouter = (): Router => {
 
   return router.getRouter();
 };
-
-async function measure<T>(tryCount: number, subject: () => T): Promise<T> {
-  let totalTime = 0;
-  let response: T;
-
-  console.log('running benchmark...');
-
-  for (let i = 0; i < tryCount; i++) {
-    const t0 = Date.now();
-    response = await subject();
-    const time = Date.now() - t0;
-    totalTime += time;
-
-    console.log(Date.now() - t0, 'ms');
-  }
-
-  console.log(`avg: ${totalTime / tryCount} ms`);
-  console.log('benchmark finished');
-
-  return response!;
-}
