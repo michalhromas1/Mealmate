@@ -1,9 +1,12 @@
-import { expressAdapter } from './adapters/express-adapter/express-adapter';
-import { router } from './router';
+import { App } from './app/app';
+import { createAppRouter } from './router';
 
-const port = 3000;
-const basePath = '/api';
+const server = new App({
+  port: 3000,
+  basePath: '/api',
+  router: createAppRouter(),
+});
 
-expressAdapter.startServer(port, basePath, router, () => {
-  console.log('Server started at port: ' + port);
+server.start((config) => {
+  console.log('Server started at port: ' + config.port);
 });

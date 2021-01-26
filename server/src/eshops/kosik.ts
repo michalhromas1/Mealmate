@@ -1,8 +1,8 @@
-import { CrawledWebsite } from '../crawled-websites.model';
+import { Eshop } from './eshops.model';
 
 const productSelector = '[data-tid="product-box"]';
 
-export const kosik: CrawledWebsite = {
+export const kosik: Eshop = {
   url: 'https://kosik.cz',
   selectors: {
     search: {

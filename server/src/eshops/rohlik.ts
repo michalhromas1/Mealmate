@@ -1,6 +1,6 @@
-import { CrawledWebsite } from '../crawled-websites.model';
+import { Eshop } from './eshops.model';
 
-export const rohlik: CrawledWebsite = {
+export const rohlik: Eshop = {
   url: 'https://rohlik.cz',
   selectors: {
     search: {

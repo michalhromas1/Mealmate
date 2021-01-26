@@ -1,140 +1,82 @@
 import * as puppeteer from 'puppeteer';
-import { puppeteerAdapter as pup } from '../adapters/puppeteer-adapter/puppeteer-adapter';
-import {
-  CrawledWebsite,
-  CrawledWebsiteProductSelectors,
-} from '../crawled-websites/crawled-websites.model';
-import { Product, ProductResults, ProductVariant } from './products.model';
+import { Cluster } from 'puppeteer-cluster';
+import { PuppeteerAdapter as Pup } from '../adapters/puppeteer-adapter/puppeteer-adapter';
+import { puppeteerAdapterConfig } from '../adapters/puppeteer-adapter/puppeteer-adapter-config';
+import { Eshop, EshopProductSelectors } from '../eshops/eshops.model';
+import { Product, ProductVariant } from './products.model';
+
+interface ClusterData {
+  eshop: Eshop;
+  query: string;
+}
 
 export class Products {
-  constructor(private websites: CrawledWebsite[], private queries: string[]) {}
+  constructor(private eshops: Eshop[], private queries: string[]) {}
 
   async fetchProducts(): Promise<Product[]> {
     return await this.searchForProducts();
   }
 
   private async searchForProducts(): Promise<Product[]> {
-    const results: Product[] = [];
+    const cluster: Cluster<ClusterData, void> = await Cluster.launch({
+      concurrency: Cluster.CONCURRENCY_BROWSER,
+      maxConcurrency: 3,
+      puppeteerOptions: puppeteerAdapterConfig.browser,
+    });
 
-    for (let i = 0; i < this.queries.length; i++) {
-      const query = this.queries[i];
-      const webResults = await this.searchWebsitesForProductVariants(query);
-      results.push({
-        title: query,
-        results: webResults,
-      });
-    }
+    const products: Product[] = this.queries.map((query) => ({ title: query, results: [] }));
 
-    return results;
-  }
+    await cluster.task(async ({ page, data }) => {
+      const { query, eshop: website } = data;
 
-  private async searchWebsitesForProductVariants(query: string): Promise<ProductResults[]> {
-    const promisesBrowsers = [];
-    for (let i = 0; i < this.websites.length; i++) {
-      const website = this.websites[i];
-      promisesBrowsers.push(
-        new Promise(async (resBrowser: (value: ProductResults) => void) => {
-          const browser = await pup.createBrowser();
-          const page = await pup.getFirstBrowserPage(browser);
+      const product = products.find((p) => p.title === query)!;
 
-          await pup.navigateTo(page, website.url);
-          await pup.search(
-            page,
-            website.selectors.search.input,
-            website.selectors.search.submit,
-            query
-          );
+      await Pup.configurePage(page);
+      await Pup.navigateTo(page, website.url);
 
-          const productVariants = await this.searchSingleWebsiteForProductVariants(
-            page,
-            website.selectors.product
-          );
-
-          await pup.closeBrowser(browser);
-
-          resBrowser({
-            website: website.url,
-            variants: productVariants,
-          });
-
-          // return {
-          //   website: website.url,
-          //   variants: productVariants,
-          // };
-        })
+      await Pup.search(
+        page,
+        website.selectors.search.input,
+        website.selectors.search.submit,
+        query
       );
-    }
 
-    return await Promise.all(promisesBrowsers);
+      const productVariants = await this.searchSingleWebsiteForProductVariants(
+        page,
+        website.selectors.product
+      );
 
-    // return Promise.all(
-    //   this.websites.map(async (website) => {
-    //     const browser = await pup.createBrowser();
-    //     const page = await pup.getFirstBrowserPage(browser);
+      product.results.push({
+        website: website.url,
+        variants: productVariants,
+      });
+    });
 
-    //     await pup.navigateTo(page, website.url);
-    //     await pup.search(
-    //       page,
-    //       website.selectors.search.input,
-    //       website.selectors.search.submit,
-    //       query
-    //     );
+    cluster.on('taskerror', (err: any, data: ClusterData) => {
+      console.log(`Error crawling ${data.eshop} for ${data.query}: ${err.message}`);
+    });
 
-    //     const productVariants = await this.searchSingleWebsiteForProductVariants(
-    //       page,
-    //       website.selectors.product
-    //     );
+    this.queries.forEach((query) => {
+      this.eshops.forEach((website) => {
+        cluster.queue({ query, eshop: website });
+      });
+    });
 
-    //     await pup.closeBrowser(browser);
+    await cluster.idle();
+    await cluster.close();
 
-    //     return {
-    //       website: website.url,
-    //       variants: productVariants,
-    //     };
-    //   })
-    // );
-
-    // const productVariantsOnWebsites: ProductResults[] = [];
-
-    // for (let i = 0; i < this.websites.length; i++) {
-    //   const website = this.websites[i];
-
-    //   const browser = await pup.createBrowser();
-    //   const page = await pup.getFirstBrowserPage(browser);
-
-    //   await pup.navigateTo(page, website.url);
-    //   await pup.search(
-    //     page,
-    //     website.selectors.search.input,
-    //     website.selectors.search.submit,
-    //     query
-    //   );
-
-    //   const productVariants = await this.searchSingleWebsiteForProductVariants(
-    //     page,
-    //     website.selectors.product
-    //   );
-
-    //   await pup.closeBrowser(browser);
-
-    //   productVariantsOnWebsites.push({
-    //     website: website.url,
-    //     variants: productVariants,
-    //   });
-    // }
-
-    // return productVariantsOnWebsites;
+    return products;
   }
 
   private async searchSingleWebsiteForProductVariants(
     page: puppeteer.Page,
-    productSelectors: CrawledWebsiteProductSelectors
+    productSelectors: EshopProductSelectors
   ): Promise<ProductVariant[]> {
     let hasVariants = false;
 
     await Promise.race([
-      pup.waitForSelector(page, productSelectors.title).then(() => (hasVariants = true)),
-      pup.waitForSelector(page, productSelectors.noVariants),
+      Pup.waitForSelector(page, productSelectors.title).then(() => (hasVariants = true)),
+      Pup.waitForSelector(page, productSelectors.noVariants),
     ]).catch(() => {});
 
     return hasVariants
@@ -144,7 +86,7 @@ export class Products {
 
   private async getProductVariantsFromSingleWebsite(
     page: puppeteer.Page,
-    productSelectors: CrawledWebsiteProductSelectors
+    productSelectors: EshopProductSelectors
   ): Promise<ProductVariant[]> {
     const variantEls = await page.$$(productSelectors.variant);
 
@@ -157,7 +99,7 @@ export class Products {
 
   private async getSingleProductVariant(
     variantEl: puppeteer.ElementHandle<Element>,
-    productSelectors: CrawledWebsiteProductSelectors
+    productSelectors: EshopProductSelectors
   ): Promise<ProductVariant> {
     const price = await this.getProductVariantProperty(variantEl, productSelectors.price);
     const priceFraction = await this.getProductVariantProperty(
@@ -180,7 +122,7 @@ export class Products {
     const fallback = '';
     const propertyEl = await variantEl.$(propertySelector);
     return propertyEl
-      ? this.parseProperty(await pup.getProperty<string>(propertyEl, 'textContent', fallback))
+      ? this.parseProperty(await Pup.getProperty<string>(propertyEl, 'textContent', fallback))
       : fallback;
   }
 

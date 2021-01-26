@@ -1,28 +1,42 @@
 import * as bodyparser from 'body-parser';
 import * as cors from 'cors';
 import * as express from 'express';
+import {
+  ExpressAdapterCreateGetRouteParams,
+  ExpressAdapterGetRouteAction,
+  ExpressAdapterRouter,
+  ExpressAdapterServerConfig,
+  ExpressAdapterStartServerCallback,
+} from './express-adapter.model';
 
-export const expressAdapter = {
-  startServer(port: number, basePath: string, router: express.Router, callback?: () => void): void {
+export class ExpressAdapter {
+  static startServer(
+    config: ExpressAdapterServerConfig,
+    callback?: ExpressAdapterStartServerCallback
+  ): void {
     const server = express();
+
     server.use(cors());
     server.use(bodyparser.json());
-    server.use(basePath, router);
+    server.use(config.basePath, config.router);
 
-    server.listen(port, () => {
+    server.listen(config.port, () => {
       if (callback) {
-        callback();
+        callback(config);
       }
     });
-  },
+  }
 
-  createGetRoute<T>(
-    router: express.Router,
-    path: string,
-    action: (res: express.Response<T>) => void
-  ) {
-    router.get(`/${path}`, (req, res, next) => {
-      action(res);
+  static createRouter(): ExpressAdapterRouter {
+    return express.Router();
+  }
+
+  static createGetRoute<T>(
+    params: ExpressAdapterCreateGetRouteParams,
+    action: ExpressAdapterGetRouteAction<T>
+  ): void {
+    params.router.get(`/${params.path}`, (request, response, next) => {
+      action(response);
     });
-  },
-};
+  }
+}
