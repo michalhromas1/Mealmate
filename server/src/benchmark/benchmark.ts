@@ -38,7 +38,7 @@ export class Benchmark {
   }
 
   private static printAverage(average: number): void {
-    console.log(`Avg: ${average} ${this.units}`);
+    console.log(`Average: ${average} ${this.units}`);
   }
 
   private static getDuration(startTime: number): number {
