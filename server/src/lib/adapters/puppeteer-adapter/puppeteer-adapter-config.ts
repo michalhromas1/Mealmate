@@ -14,7 +14,7 @@ export const puppeteerAdapterConfig: PuppeteerAdapterConfig = {
       deviceScaleFactor: 1,
     },
     waitForSelector: {
-      timeout: 6000,
+      timeout: 10000,
     },
     userAgent:
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
