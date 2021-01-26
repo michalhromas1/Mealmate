@@ -53,7 +53,7 @@ export class Products {
     });
 
     cluster.on('taskerror', (err: any, data: ClusterData) => {
-      console.log(`Error crawling ${data.eshop} for ${data.query}: ${err.message}`);
+      console.log(`Error crawling ${data.eshop.url} for ${data.query}: ${err.message}`);
     });
 
     this.queries.forEach((query) => {

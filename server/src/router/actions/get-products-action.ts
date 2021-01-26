@@ -11,7 +11,7 @@ export const getProductsAction: GetRouteAction<Product[]> = async (response) => 
   const eshops: Eshop[] = [rohlik, kosik];
   const queries = [
     'mango',
-    'losos',
+    'spacák',
     'chřest',
     // 'banán',
     // 'mrkev',
