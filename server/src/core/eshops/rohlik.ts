@@ -11,6 +11,7 @@ export const rohlik: Eshop = {
       variant: '.productCard__wrapper',
       title: '.productCard__title',
       unitPrice: '.pricePerOffer',
+      unitDelimeter: '/',
       noVariants: '[data-test="no-products-found"]',
       image: '.productCard__img',
       link: 'a.imgWrapper',

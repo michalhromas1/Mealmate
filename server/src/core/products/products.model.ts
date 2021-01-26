@@ -10,7 +10,9 @@ export interface ProductResults {
 
 export interface ProductVariant {
   title: string;
+  unit: string;
   unitPrice: string;
+  currency: string;
   image: string;
   link: string;
 }

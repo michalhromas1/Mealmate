@@ -103,9 +103,33 @@ export class Products {
   ): Promise<ProductVariant> {
     return {
       title: await this.getProductVariantProperty(variantEl, productSelectors.title),
-      unitPrice: await this.getProductVariantProperty(variantEl, productSelectors.unitPrice),
       image: await this.getProductVariantProperty(variantEl, productSelectors.image, 'currentSrc'),
       link: await this.getProductVariantProperty(variantEl, productSelectors.link, 'href'),
+      ...(await this.getUnitPriceInfo(
+        variantEl,
+        productSelectors.unitPrice,
+        productSelectors.unitDelimeter
+      )),
+    };
+  }
+
+  private async getUnitPriceInfo(
+    variantEl: puppeteer.ElementHandle<Element>,
+    selector: string,
+    delimeter: string
+  ): Promise<{ unit: string; unitPrice: string; currency: string }> {
+    const unitPriceInfo = await this.getProductVariantProperty(variantEl, selector);
+    const unitPriceParts = unitPriceInfo.split(delimeter);
+
+    const priceAndCurrency = unitPriceParts[0].replace(',', '.').replace(/\s/g, '');
+    const unitPrice = parseFloat(priceAndCurrency).toString();
+    const currency = priceAndCurrency.replace(/[0-9]/g, '').replace(/[.]/g, '');
+    const unit = unitPriceParts[unitPriceParts.length - 1];
+
+    return {
+      unit: this.parseProperty(unit),
+      unitPrice: this.parseProperty(unitPrice),
+      currency: this.parseProperty(currency),
     };
   }
 

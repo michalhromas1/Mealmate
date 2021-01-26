@@ -13,6 +13,7 @@ export const kosik: Eshop = {
       variant: productSelector,
       title: `${productSelector} .name`,
       unitPrice: `${productSelector} .price-unit`,
+      unitDelimeter: '/',
       noVariants: '[data-v-1ea39232]',
       image: 'a.top-wrapper img',
       link: 'a.top-wrapper',
