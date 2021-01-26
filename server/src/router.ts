@@ -4,7 +4,6 @@ import { Eshop } from './eshops/eshops.model';
 import { kosik } from './eshops/kosik';
 import { rohlik } from './eshops/rohlik';
 import { Products } from './products/products';
-import { Product } from './products/products.model';
 
 export const createAppRouter = (): Router => {
   const router = new AppRouter();
@@ -48,9 +47,9 @@ export const createAppRouter = (): Router => {
 
     // res.json(fetchedProducts);
 
-    let fetchedProducts: Product[] = [];
+    // let fetchedProducts: Product[] = [];
 
-    await measure(5, async () => {
+    const fetchedProducts = await measure(1, async () => {
       const eshops: Eshop[] = [rohlik, kosik];
       const queries = [
         'mango',
@@ -65,7 +64,7 @@ export const createAppRouter = (): Router => {
         // 'bramborový salát',
       ];
       const products = new Products(eshops, queries);
-      fetchedProducts = await products.fetchProducts();
+      return await products.fetchProducts();
     });
 
     res.json(fetchedProducts);
@@ -74,14 +73,15 @@ export const createAppRouter = (): Router => {
   return router.getRouter();
 };
 
-async function measure(tryCount: number, subject: () => any): Promise<void> {
+async function measure<T>(tryCount: number, subject: () => T): Promise<T> {
   let totalTime = 0;
+  let response: T;
 
   console.log('running benchmark...');
 
   for (let i = 0; i < tryCount; i++) {
     const t0 = Date.now();
-    await subject();
+    response = await subject();
     const time = Date.now() - t0;
     totalTime += time;
 
@@ -90,4 +90,6 @@ async function measure(tryCount: number, subject: () => any): Promise<void> {
 
   console.log(`avg: ${totalTime / tryCount} ms`);
   console.log('benchmark finished');
+
+  return response!;
 }
