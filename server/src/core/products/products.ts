@@ -1,7 +1,7 @@
 import * as puppeteer from 'puppeteer';
 import { Cluster } from 'puppeteer-cluster';
-import { PuppeteerAdapter as Pup } from '../adapters/puppeteer-adapter/puppeteer-adapter';
-import { puppeteerAdapterConfig } from '../adapters/puppeteer-adapter/puppeteer-adapter-config';
+import { PuppeteerAdapter as Pup } from '../../lib/adapters/puppeteer-adapter/puppeteer-adapter';
+import { puppeteerAdapterConfig } from '../../lib/adapters/puppeteer-adapter/puppeteer-adapter-config';
 import { Eshop, EshopProductSelectors } from '../eshops/eshops.model';
 import { Product, ProductVariant } from './products.model';
 

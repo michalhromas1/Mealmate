@@ -1,5 +1,5 @@
-import { App } from './app/app';
-import { createAppRouter } from './router';
+import { App } from './lib/app/app';
+import { createAppRouter } from './router/router';
 
 const app = new App({
   port: 3000,
